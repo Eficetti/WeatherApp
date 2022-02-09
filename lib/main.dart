@@ -1,5 +1,4 @@
 // ignore_for_file: prefer_const_constructors, unnecessary_null_comparison
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:convert';
@@ -22,14 +21,21 @@ class _HomeState extends State<Home> {
   double temperatura = 0;
   var descripcion = ' ';
   var actual = ' ';
+  String city = ' ';
   var humedad = 0;
   double viento = 0;
+  TextEditingController textEditingController = TextEditingController();
 
   Future getWeather() async {
     http.Response response = await http.get(Uri.parse(
-        'https://api.openweathermap.org/data/2.5/weather?lat=-33.1236&lon=-64.3492&units=metric&appid=d610f567c28f1d2151a05a8681367d8d&lang=es'));
+        'https://api.openweathermap.org/data/2.5/weather?q=' +
+            city +
+            '&units=metric&appid=d610f567c28f1d2151a05a8681367d8d&lang=es'));
     var decode = jsonDecode(response.body);
     setState(() {
+      if (city == null || city == ' ') {
+        city = 'Cordoba';
+      }
       temperatura = decode['main']['temp'];
       descripcion = decode['weather'][0]['description'];
       actual = decode['weather'][0]['description'];
@@ -41,7 +47,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    getWeather();
   }
 
   @override
@@ -52,24 +57,36 @@ class _HomeState extends State<Home> {
           Container(
               height: MediaQuery.of(context).size.height / 3,
               width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/img/weather.jpg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
+              decoration: BoxDecoration(color: Colors.blueGrey),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  TextField(
+                    controller: textEditingController,
+                    decoration: InputDecoration(
+                        hintText: 'Ingrese una ciudad',
+                        hintStyle: TextStyle(color: Colors.white),
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(25.0)))),
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                    onSubmitted: (value) {
+                      city = value;
+                      getWeather();
+                    },
+                  ),
                   Padding(
                     padding: EdgeInsets.only(bottom: 10.0),
                     child: Text(
-                      'Rio cuarto',
+                      city,
                       style: TextStyle(
                           fontSize: 40.0,
                           fontWeight: FontWeight.bold,
-                          color: Colors.amber[900]),
+                          color: Colors.white),
                     ),
                   ),
                   Text(
@@ -77,7 +94,7 @@ class _HomeState extends State<Home> {
                         ? temperatura.toString() + '\u00B0'
                         : 'Cargando',
                     style: TextStyle(
-                      color: Colors.amber[900],
+                      color: Colors.white,
                       fontSize: 40.0,
                       fontWeight: FontWeight.bold,
                     ),
@@ -89,7 +106,7 @@ class _HomeState extends State<Home> {
                       style: TextStyle(
                           fontSize: 40.0,
                           fontWeight: FontWeight.bold,
-                          color: Colors.amber[900]),
+                          color: Colors.white),
                     ),
                   ),
                 ],
@@ -101,7 +118,7 @@ class _HomeState extends State<Home> {
                 children: [
                   ListTile(
                     leading: FaIcon(FontAwesomeIcons.thermometerHalf,
-                        color: Colors.yellow),
+                        color: Colors.amber[900]),
                     title: Text('Temperatura'),
                     trailing: Text(temperatura != null
                         ? temperatura.toString() + '52\u00B0'
@@ -109,7 +126,7 @@ class _HomeState extends State<Home> {
                   ),
                   ListTile(
                     leading:
-                        FaIcon(FontAwesomeIcons.cloud, color: Colors.yellow),
+                        FaIcon(FontAwesomeIcons.cloud, color: Colors.lightBlue),
                     title: Text('Clima'),
                     trailing: Text(descripcion != null
                         ? descripcion.toString() + '\u00B0'
@@ -123,8 +140,7 @@ class _HomeState extends State<Home> {
                         : 'Cargando'),
                   ),
                   ListTile(
-                    leading:
-                        FaIcon(FontAwesomeIcons.wind, color: Colors.yellow),
+                    leading: FaIcon(FontAwesomeIcons.wind, color: Colors.grey),
                     title: Text('Viento'),
                     trailing: Text(viento != null
                         ? viento.toString() + '\u00B0'
